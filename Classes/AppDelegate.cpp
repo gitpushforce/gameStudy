@@ -1,7 +1,9 @@
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
+using namespace CocosDenshion;
 
 static cocos2d::Size designResolutionSize = cocos2d::Size(480, 320);
 static cocos2d::Size smallResolutionSize = cocos2d::Size(480, 320);
@@ -53,8 +55,29 @@ bool AppDelegate::applicationDidFinishLaunching() {
     director->setAnimationInterval(1.0f / 60);
 
     // Set the design resolution
-    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
+    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::EXACT_FIT);
     auto frameSize = glview->getFrameSize();
+	auto designSIze = Size(768, 1024);
+
+	//if its larger than 768 then take the resoruces from the "hd" folder and make all bigger scale (2), if not then use the folder "sd"
+	std::vector<std::string> searchPaths;
+	if (frameSize.width > 768) {
+		searchPaths.push_back("hd");
+		director->setContentScaleFactor(2);
+	}
+	else {
+		searchPaths.push_back("sd");
+		director->setContentScaleFactor(1);
+	}
+	auto fileUtils = FileUtils::getInstance();
+	fileUtils->setSearchPaths(searchPaths);
+
+	//audio 
+	auto audioEngine = SimpleAudioEngine::getInstance();
+	audioEngine->preloadEffect(fileUtils->fullPathForFilename("hit.wav").c_str());
+	audioEngine->preloadEffect(fileUtils->fullPathForFilename("score.wav").c_str());
+	audioEngine->setBackgroundMusicVolume(0.5f);
+	audioEngine->setEffectsVolume(0.5f);
     // if the frame's height is larger than the height of medium size.
     if (frameSize.height > mediumResolutionSize.height)
     {        
